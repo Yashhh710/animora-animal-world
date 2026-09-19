@@ -4,6 +4,12 @@
 
 ANIMORA is an interactive cartoon-style animal world designed to make exploring animals feel like stepping into an animated movie.
 
+---
+
+live link - https://yashhh710.github.io/animora-animal-world/
+
+---
+
 Each animal has its own environment, visual identity, animations, and interactive experience.
 
 <img width="1918" height="1079" alt="image-Photoroom (24)" src="https://github.com/user-attachments/assets/e29d55a5-d77c-427c-be12-0a67e226d240" />
