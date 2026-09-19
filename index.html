@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Animal</title>
+  <link rel="icon" type="image/png" href="https://img.icons8.com/?size=100&id=Ul3cLpRZR7Xm&format=png&color=000000">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@800&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      background-image: url('models/loding.png');
+      background-position: center center;
+      background-size: cover;
+      background-repeat: no-repeat;
+      color: #ffffff;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      overflow: hidden;
+      position: relative;
+    }
+
+    @keyframes bgShift {
+      0%, 100% { background-position: 50% 0%; }
+      50% { background-position: 50% 100%; }
+    }
+
+    .sparkle {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(circle, #ffe9c7 0%, rgba(255,233,199,0) 70%);
+      opacity: 0;
+      animation: sparkleFloat 4.5s ease-in-out infinite;
+      pointer-events: none;
+    }
+    .sparkle:nth-child(1) { width: 10px; height: 10px; top: 20%; left: 15%; animation-delay: 0s; }
+    .sparkle:nth-child(2) { width: 6px;  height: 6px;  top: 30%; left: 80%; animation-delay: 0.8s; }
+    .sparkle:nth-child(3) { width: 14px; height: 14px; top: 70%; left: 20%; animation-delay: 1.6s; }
+    .sparkle:nth-child(4) { width: 8px;  height: 8px;  top: 65%; left: 85%; animation-delay: 2.4s; }
+    .sparkle:nth-child(5) { width: 5px;  height: 5px;  top: 15%; left: 50%; animation-delay: 1.2s; }
+    .sparkle:nth-child(6) { width: 11px; height: 11px; top: 80%; left: 55%; animation-delay: 3s; }
+
+    @keyframes sparkleFloat {
+      0%   { opacity: 0; transform: translateY(0) scale(0.5); }
+      40%  { opacity: 1; }
+      100% { opacity: 0; transform: translateY(-60px) scale(1.2); }
+    }
+
+    .brand-wrap {
+      position: relative;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-bottom: 8px;
+      perspective: 600px;
+    }
+
+    .brand-wrap::after {
+      content: '';
+      position: absolute;
+      bottom: -10px;
+      width: 60%;
+      height: 22px;
+      background: radial-gradient(ellipse at center, rgba(0,0,0,0.4) 0%, rgba(0,0,0,0) 70%);
+      filter: blur(4px);
+      z-index: -1;
+      animation: shadowPulse 2.4s ease-in-out infinite;
+    }
+
+    @keyframes shadowPulse {
+      0%, 100% { transform: scaleX(1); opacity: 0.6; }
+      50%      { transform: scaleX(0.85); opacity: 0.35; }
+    }
+
+    .brand-title {
+      position: relative;
+      font-family: 'Baloo 2', 'Segoe UI', sans-serif;
+      font-weight: 800;
+      font-size: clamp(2.4rem, 9vw, 5.2rem);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-bottom: 32px;
+      line-height: 1;
+      display: flex;
+      gap: 0.02em;
+    }
+
+    .brand-title .letter {
+      position: relative;
+      display: inline-block;
+      color: #ffd9a8;
+      -webkit-text-stroke: 10px #4a2b18;
+      paint-order: stroke fill;
+      text-shadow:
+        0 2px 0 #ffe9c7,
+        0 -3px 0 #4a2b18,
+        3px 3px 0 #4a2b18,
+        -3px 3px 0 #4a2b18,
+        3px -1px 0 #4a2b18,
+        -3px -1px 0 #4a2b18,
+        0 10px 0 #d98a4f,
+        0 14px 18px rgba(0, 0, 0, 0.45);
+      opacity: 0;
+      transform: translateY(-40px) rotate(-8deg) scale(0.6);
+      animation:
+        letterDrop 0.7s cubic-bezier(.34,1.56,.64,1) forwards,
+        letterBob 2.6s ease-in-out infinite;
+      animation-delay: var(--d), calc(var(--d) + 0.7s);
+    }
+
+    .brand-title .letter::before {
+      content: attr(data-l);
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 100%;
+      -webkit-text-stroke: 0;
+      color: transparent;
+      background: linear-gradient(
+        180deg,
+        rgba(255, 255, 255, 0.85) 0%,
+        rgba(255, 255, 255, 0.35) 30%,
+        rgba(255, 255, 255, 0) 55%
+      );
+      background-clip: text;
+      -webkit-background-clip: text;
+      pointer-events: none;
+    }
+
+    .brand-title .letter::after {
+      content: '';
+      position: absolute;
+      top: 8%;
+      left: 18%;
+      width: 22%;
+      height: 22%;
+      background: rgba(255,255,255,0.75);
+      border-radius: 50%;
+      filter: blur(1px);
+      opacity: 0.7;
+      animation: glintMove 3.2s ease-in-out infinite;
+    }
+
+    @keyframes letterDrop {
+      0%   { opacity: 0; transform: translateY(-40px) rotate(-8deg) scale(0.6); }
+      60%  { opacity: 1; transform: translateY(6px) rotate(3deg) scale(1.08); }
+      100% { opacity: 1; transform: translateY(0) rotate(0deg) scale(1); }
+    }
+
+    @keyframes letterBob {
+      0%, 100% { transform: translateY(0) rotate(0deg); }
+      25%      { transform: translateY(-6px) rotate(-2deg); }
+      75%      { transform: translateY(3px) rotate(2deg); }
+    }
+
+    @keyframes glintMove {
+      0%, 100% { opacity: 0.7; transform: translate(0, 0); }
+      50%      { opacity: 0.2; transform: translate(4px, 4px); }
+    }
+
+    .spinner-wrap {
+      position: relative;
+      width: 60px;
+      height: 60px;
+      margin-top: 10px;
+    }
+
+    .spinner {
+      width: 48px;
+      height: 48px;
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      border: 4px solid rgba(255, 255, 255, 0.1);
+      border-left-color: #38bdf8;
+      border-right-color: #818cf8;
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    .spinner-wrap::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border-radius: 50%;
+      box-shadow: 0 0 18px 4px rgba(56, 189, 248, 0.35);
+      animation: glowPulse 1.6s ease-in-out infinite;
+    }
+
+    @keyframes glowPulse {
+      0%, 100% { opacity: 0.4; transform: scale(0.9); }
+      50%      { opacity: 1;   transform: scale(1.05); }
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading-text {
+      margin-top: 16px;
+      font-size: 0.95rem;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: #9db2d4;
+      animation: fadeBlink 1.8s ease-in-out infinite;
+    }
+
+    @keyframes fadeBlink {
+      0%, 100% { opacity: 0.4; }
+      50%      { opacity: 1; }
+    }
+
+    .page-transition-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(9, 12, 19, 0.28);
+      backdrop-filter: blur(6px);
+      opacity: 0;
+      pointer-events: none;
+      z-index: 1000;
+      transition: opacity 420ms ease;
+    }
+
+    body.transitioning .page-transition-overlay {
+      opacity: 1;
+    }
+
+    body.transitioning .brand-wrap,
+    body.transitioning .spinner-wrap,
+    body.transitioning .loading-text {
+      transform: translateY(-16px) scale(0.98);
+      opacity: 0;
+      transition: transform 420ms ease, opacity 420ms ease;
+    }
+  </style>
+</head>
+<body>
+
+  <span class="sparkle"></span>
+  <span class="sparkle"></span>
+  <span class="sparkle"></span>
+  <span class="sparkle"></span>
+  <span class="sparkle"></span>
+  <span class="sparkle"></span>
+
+  <div class="brand-wrap">
+    <h1 class="brand-title" id="brandTitle"></h1>
+  </div>
+
+  <div class="spinner-wrap">
+    <div class="spinner"></div>
+  </div>
+  <div class="loading-text">Loading</div>
+  <div class="page-transition-overlay" aria-hidden="true"></div>
+
+  <script src="cursor.js"></script>
+  <script>
+    // Build the bubbly logo letter-by-letter so each one can animate in with a delay
+    (function () {
+      var text = 'ANIMORA';
+      var container = document.getElementById('brandTitle');
+      for (var i = 0; i < text.length; i++) {
+        var span = document.createElement('span');
+        span.className = 'letter';
+        span.setAttribute('data-l', text[i]);
+        span.style.setProperty('--d', (i * 0.09) + 's');
+        span.textContent = text[i];
+        container.appendChild(span);
+      }
+    })();
+
+    setTimeout(function () {
+      document.body.classList.add('transitioning');
+      setTimeout(function () {
+        window.location.replace('cat.html');
+      }, 420);
+    }, 5000);
+  </script>
+
+</body>
+</html>

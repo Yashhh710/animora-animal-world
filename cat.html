@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>ANIMORA | Cat</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<link id="pageFavicon" rel="icon" type="image/png" href="models/cat/logo.png">
+<style>
+  :root {
+    --overlay-bottom: rgba(20, 14, 4, 0.55);
+    --card: #ffffff;
+    --text: #4a3b22;
+    --accent: #ff8c42;
+  }
+  * { box-sizing: border-box; }
+  @view-transition { navigation: none; }
+  html, body {
+    margin: 0; min-height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    color: var(--text);
+    overflow: hidden;
+  }
+  body {
+    position: relative;
+    isolation: isolate;
+    background-color: #2a1d14;
+    background-image: var(--page-background);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    overflow: hidden;
+  }
+  body.page-leaving {
+    pointer-events: none;
+  }
+  body.page-slide-left::before {
+    animation: background-from-left 280ms cubic-bezier(.2,.8,.2,1) both;
+  }
+  body.page-slide-right::before {
+    animation: background-from-right 280ms cubic-bezier(.2,.8,.2,1) both;
+  }
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background-image: var(--page-background);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    animation: background-enter 280ms cubic-bezier(.2,.8,.2,1) both;
+    will-change: transform, opacity;
+  }
+  @keyframes background-enter {
+    from { transform: scale(1.02); }
+    to { transform: scale(1); }
+  }
+  @keyframes background-from-left {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(0); }
+  }
+  @keyframes background-from-right {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+  }
+  @keyframes background-exit-left {
+    to { transform: translateX(-100%); }
+  }
+  @keyframes background-exit-right {
+    to { transform: translateX(100%); }
+  }
+  .stage {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    user-select: none;
+    background: linear-gradient(to bottom, var(--overlay-top), var(--overlay-bottom));
+  }
+  h1 {
+    font-size: 1.5rem;
+    margin: 0;
+    color: #fff8ec;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.5);
+    letter-spacing: 0.5px;
+  }
+  .sub {
+    font-size: 0.9rem;
+    color: #fff8ec;
+    opacity: 0.85;
+    margin-top: -12px;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+  }
+  .character-wrap {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+  }
+  .halo {
+    position: absolute;
+    width: min(110vw, 1250px, 110dvh);
+    height: min(110vw, 1250px, 110dvh);
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(255,196,77,0.5), rgba(255,196,77,0) 70%);
+    filter: blur(2px);
+    animation: pulse 3.5s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.06); opacity: 1; }
+  }
+  .sprite {
+    position: relative;
+    width: min(110vw, 1250px, 110dvh);
+    height: min(110vw, 1250px, 110dvh);
+    background-repeat: no-repeat;
+    background-size: 300% 300%;
+    image-rendering: -webkit-optimize-contrast;
+    cursor: pointer;
+    filter: drop-shadow(0 16px 20px rgba(0,0,0,0.35));
+    transform-origin: 50% 85%;
+  }
+  .sprite.emoji-animal {
+    display: grid;
+    place-items: center;
+    background-image: none !important;
+    font-size: min(48vw, 520px);
+    line-height: 1;
+    image-rendering: auto;
+  }
+  .sprite.pressed {
+    animation: press 0.28s cubic-bezier(.4,0,.2,1);
+  }
+  @keyframes press {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(0.86) translateY(6px); }
+    70%  { transform: scale(1.05) translateY(-2px); }
+    100% { transform: scale(1); }
+  }
+  .sprite.idle-nudge {
+    animation: idle-nudge 0.9s ease-in-out;
+  }
+  @keyframes idle-nudge {
+    0%   { transform: translateY(0) rotate(0deg); }
+    20%  { transform: translateY(-10px) rotate(-3deg); }
+    40%  { transform: translateY(0) rotate(3deg); }
+    60%  { transform: translateY(-6px) rotate(-2deg); }
+    80%  { transform: translateY(0) rotate(1deg); }
+    100% { transform: translateY(0) rotate(0deg); }
+  }
+
+  .reactions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+    width: 190px;
+    position: fixed;
+    left: 24px;
+    top: 82px;
+    z-index: 3;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateY(-16px) scale(0.85);
+    transform-origin: top left;
+  }
+  .reactions.open {
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateY(0) scale(1);
+    transition: opacity 220ms ease, transform 280ms cubic-bezier(.2,.8,.2,1), visibility 0s;
+  }
+  .reactions.open .rbtn {
+    animation: reaction-pop 280ms cubic-bezier(.2,.8,.2,1) both;
+  }
+  .reactions.open .rbtn:nth-child(2) { animation-delay: 25ms; }
+  .reactions.open .rbtn:nth-child(3) { animation-delay: 50ms; }
+  .reactions.open .rbtn:nth-child(4) { animation-delay: 75ms; }
+  .reactions.open .rbtn:nth-child(5) { animation-delay: 100ms; }
+  .reactions.open .rbtn:nth-child(6) { animation-delay: 125ms; }
+  .reactions.open .rbtn:nth-child(7) { animation-delay: 150ms; }
+  .reactions.open .rbtn:nth-child(8) { animation-delay: 175ms; }
+  .reactions.open .rbtn:nth-child(9) { animation-delay: 200ms; }
+  .reactions.open .rbtn:nth-child(10) { animation-delay: 225ms; }
+  @keyframes reaction-pop {
+    from { opacity: 0; transform: translateY(10px) scale(0.65); }
+    to { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  .floating-controls {
+    position: fixed;
+    left: 20px;
+    top: 20px;
+    z-index: 4;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .animals-grid-toggle,
+  .reaction-toggle {
+    border: none;
+    width: 52px;
+    height: 52px;
+    padding: 0;
+    border-radius: 50%;
+    background: var(--accent);
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 3px 10px rgba(0,0,0,0.25);
+    display: grid;
+    place-items: center;
+  }
+  .animals-grid-toggle {
+    background: rgba(25,18,12,0.54);
+    backdrop-filter: blur(8px);
+  }
+  .animal-grid-panel {
+    position: fixed;
+    left: 20px;
+    top: 92px;
+    width: min(440px, calc(100vw - 40px));
+    max-height: min(60vh, 520px);
+    overflow: auto;
+    padding: 14px;
+    border-radius: 20px;
+    background: rgba(37, 25, 16, 0.82);
+    backdrop-filter: blur(10px);
+    box-shadow: 0 18px 48px rgba(0,0,0,0.22);
+    display: none;
+    z-index: 5;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .animal-grid-panel::-webkit-scrollbar {
+    display: none;
+  }
+  .animal-grid-panel.open {
+    display: block;
+  }
+  .animal-grid-panel-inner {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+  }
+  .animal-grid-item {
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 16px;
+    background: rgba(255,255,255,0.06);
+    color: #fff;
+    min-height: 92px;
+    padding: 10px 8px 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    cursor: pointer;
+    transition: transform 180ms ease, background 180ms ease, border-color 180ms ease;
+  }
+  .animal-grid-item:hover,
+  .animal-grid-item:focus-visible {
+    transform: translateY(-2px);
+    background: rgba(255,255,255,0.12);
+    border-color: rgba(255,255,255,0.28);
+    outline: none;
+  }
+  .animal-grid-item.active {
+    background: rgba(255, 140, 66, 0.18);
+    border-color: rgba(255, 140, 66, 0.7);
+  }
+  .animal-grid-item .animal-grid-sprite {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    background-repeat: no-repeat;
+    background-size: 300% 300%;
+    background-position: 50% 50%;
+    image-rendering: pixelated;
+    filter: drop-shadow(0 8px 10px rgba(0,0,0,0.18));
+    transform-origin: center;
+    transition: transform 120ms ease;
+  }
+  .animal-grid-item .animal-grid-fallback {
+    font-size: 1.8rem;
+    line-height: 1;
+  }
+  .animal-grid-item span {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    text-align: center;
+  }
+  .animals-grid-toggle svg,
+  .reaction-toggle svg,
+  .rbtn svg,
+  .page-nav svg {
+    width: 22px;
+    height: 22px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2;
+  }
+  .page-nav {
+    position: fixed;
+    top: 50%;
+    z-index: 4;
+    width: 48px;
+    height: 48px;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 50%;
+    color: #fff;
+    background: rgba(25,18,12,0.42);
+    box-shadow: 0 4px 14px rgba(0,0,0,0.22);
+    cursor: pointer;
+    transform: translateY(-50%);
+    transition: transform 220ms cubic-bezier(.16,1,.3,1), background 180ms ease;
+  }
+  .page-nav:hover,
+  .page-nav:focus-visible {
+    background: var(--accent);
+    outline: none;
+  }
+  .page-nav:hover { transform: translateY(-50%) scale(1.12); }
+  .page-nav.prev { left: 18px; }
+  .page-nav.next { right: 18px; }
+  .dock {
+    position: fixed;
+    left: 50%;
+    bottom: 18px;
+    z-index: 5;
+    display: flex;
+    align-items: end;
+    gap: 7px;
+    padding: 28px 12px 10px;
+    border: 0;
+    border-radius: 22px;
+    background: transparent;
+    box-shadow: none;
+    backdrop-filter: none;
+    transform: translateX(-50%);
+    max-width: calc(100vw - 24px);
+    overflow-x: auto;
+    scrollbar-width: none;
+    isolation: isolate;
+  }
+  .dock::-webkit-scrollbar {
+    display: none;
+  }
+  .dock-item {
+    position: relative;
+    flex: 0 0 48px;
+    width: 48px;
+    height: 48px;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 14px;
+    color: #fff;
+    background: rgba(255,255,255,0.25);
+    cursor: pointer;
+    transition: transform 280ms cubic-bezier(.16,1,.3,1), background 220ms ease, margin 280ms cubic-bezier(.16,1,.3,1), box-shadow 220ms ease;
+    transform-origin: center bottom;
+    will-change: transform, margin;
+    z-index: 1;
+  }
+  .dock-item:hover,
+  .dock-item:focus-visible {
+    transform: translateY(-13px) scale(1.28);
+    margin-left: 5px;
+    margin-right: 5px;
+    background: rgba(255,255,255,0.45);
+    outline: none;
+    z-index: 3;
+  }
+  .dock-item::after {
+    content: attr(data-label);
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 12px);
+    padding: 5px 9px;
+    border-radius: 8px;
+    color: #fff;
+    background: rgba(25,18,12,0.86);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    font-size: 0.72rem;
+    font-weight: 600;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transform: translate(-50%, 5px) scale(0.9);
+    transition: opacity 140ms ease, transform 140ms ease;
+  }
+  .dock-item:hover::after,
+  .dock-item:focus-visible::after {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+  .dock-item.active {
+    transform: translateY(-10px) scale(1.12);
+    margin-left: 3px;
+    margin-right: 3px;
+    background: var(--accent);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    z-index: 2;
+  }
+  .dock-item.active::after {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1);
+  }
+  .dock-item svg {
+    width: 23px;
+    height: 23px;
+    fill: none;
+    stroke: currentColor;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    stroke-width: 2;
+  }
+  .dock-item img {
+    width: 34px;
+    height: 34px;
+    object-fit: cover;
+    border-radius: 10px;
+    pointer-events: none;
+    transition: transform 280ms cubic-bezier(.16,1,.3,1);
+  }
+  .dock-item .animal-fallback {
+    font-size: 1.65rem;
+    line-height: 1;
+    pointer-events: none;
+    transition: transform 280ms cubic-bezier(.16,1,.3,1);
+  }
+  .dock-item:hover img,
+  .dock-item:focus-visible img,
+  .dock-item:hover .animal-fallback,
+  .dock-item:focus-visible .animal-fallback {
+    transform: translateY(-2px);
+  }
+  .stage.switching .character-wrap {
+    animation: page-switch 260ms ease both;
+  }
+  .stage.switching.page-left .character-wrap {
+    animation-name: page-from-left;
+  }
+  .stage.switching.page-right .character-wrap {
+    animation-name: page-from-right;
+  }
+  .stage.page-leaving {
+    animation: none;
+  }
+  @keyframes page-switch {
+    0% { opacity: 0.35; transform: scale(0.97) translateY(10px); }
+    100% { opacity: 1; transform: scale(1) translateY(0); }
+  }
+  @keyframes page-from-left {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(0); }
+  }
+  @keyframes page-from-right {
+    from { transform: translateX(100%); }
+    to { transform: translateX(0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 1ms !important;
+      transition-duration: 1ms !important;
+    }
+  }
+  .rbtn {
+    border: none;
+    background: var(--card);
+    width: 48px;
+    height: 48px;
+    padding: 0;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.18);
+    color: var(--text);
+    display: grid;
+    place-items: center;
+  }
+  .rbtn:active {
+    transform: scale(0.92);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  }
+  .rbtn.active {
+    background: var(--accent);
+    color: white;
+  }
+  .hint {
+    font-size: 0.75rem;
+    color: #fff8ec;
+    opacity: 0.75;
+    text-align: center;
+    max-width: 320px;
+    text-shadow: 0 1px 4px rgba(0,0,0,0.5);
+  }
+  @media (max-width: 700px) {
+    .dock {
+      left: 12px;
+      right: 12px;
+      bottom: max(10px, env(safe-area-inset-bottom));
+      max-width: none;
+      transform: none;
+      justify-content: flex-start;
+      border-radius: 18px;
+      padding-top: 22px;
+    }
+    .reaction-toggle {
+      left: 14px;
+      top: calc(14px + env(safe-area-inset-top));
+      width: 48px;
+      height: 48px;
+    }
+    .page-nav {
+      width: 42px;
+      height: 42px;
+    }
+    .page-nav.prev { left: 10px; }
+    .page-nav.next { right: 10px; }
+    .reactions {
+      left: 12px;
+      top: calc(72px + env(safe-area-inset-top));
+      width: min(190px, calc(100vw - 24px));
+    }
+    .dock-item {
+      flex-basis: 44px;
+      width: 44px;
+      height: 44px;
+    }
+    .dock-item:hover,
+    .dock-item:focus-visible {
+      transform: translateY(-10px) scale(1.16);
+      margin-left: 2px;
+      margin-right: 2px;
+    }
+    .dock-item.active {
+      transform: translateY(-8px) scale(1.08);
+      margin-left: 1px;
+      margin-right: 1px;
+    }
+  }
+  @media (max-height: 600px) and (orientation: landscape) {
+    .sprite,
+    .halo {
+      width: min(84vw, 86dvh, 900px);
+      height: min(84vw, 86dvh, 900px);
+    }
+    .dock {
+      bottom: 8px;
+    }
+    .reaction-toggle {
+      top: 12px;
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="stage" id="stage">
+    <div class="character-wrap">
+      <div class="halo"></div>
+      <div class="sprite" id="sprite"></div>
+    </div>
+    <div class="reactions" id="reactions"></div>
+    <div class="floating-controls">
+      <button class="animals-grid-toggle" id="animalsGridToggle" type="button" aria-label="Show all animals" aria-expanded="false" title="Show all animals">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h7v7H4zm9 0h7v7h-7zM4 13h7v7H4zm9 0h7v7h-7z"/></svg>
+      </button>
+      <button class="reaction-toggle" id="reactionToggle" type="button" aria-label="Show reactions" aria-expanded="false" title="Show reactions">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 6.5h14A2.5 2.5 0 0 1 21.5 9v5a2.5 2.5 0 0 1-2.5 2.5H12l-4.5 3v-3H5A2.5 2.5 0 0 1 2.5 14V9A2.5 2.5 0 0 1 5 6.5Z"/><path d="M8 11.5h.01M12 11.5h.01M16 11.5h.01"/></svg>
+      </button>
+    </div>
+    <div class="animal-grid-panel" id="animalGridPanel" aria-hidden="true">
+      <div class="animal-grid-panel-inner" id="animalGridInner"></div>
+    </div>
+    <button class="page-nav prev" id="previousAnimal" type="button" aria-label="Previous animal" title="Previous animal">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+    </button>
+    <button class="page-nav next" id="nextAnimal" type="button" aria-label="Next animal" title="Next animal">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+    </button>
+    <nav class="dock" id="animalDock" aria-label="Animal pages"></nav>
+  </div>
+
+<script>
+(function() {
+  const ANIMAL_NAMES = {
+    cat: 'Cat', bear: 'Bear', bunny: 'Bunny', deer: 'Deer', dino: 'Dino',
+    fox: 'Fox', frog: 'Frog', hamster: 'Hamster', hedgehog: 'Hedgehog',
+    koala: 'Koala', mouse: 'Mouse', otter: 'Otter', owl: 'Owl', panda: 'Panda',
+    penguin: 'Penguin', pug: 'Pug', raccoon: 'Raccoon', redpanda: 'Red Panda',
+    sheep: 'Sheep', sloth: 'Sloth', tiger: 'Tiger',
+  };
+  const query = new URLSearchParams(location.search);
+  const requestedAnimal = query.get('animal') || 'cat';
+  const pageDirection = query.get('dir');
+  const animalKey = ANIMAL_NAMES[requestedAnimal] ? requestedAnimal : 'cat';
+  const availableModels = ['cat', 'bear', 'bunny', 'deer', 'dino', 'fox', 'frog', 'hamster', 'hedgehog', 'koala', 'mouse', 'otter', 'owl', 'panda', 'pug', 'penguin', 'raccoon', 'redpanda', 'sheep', 'sloth', 'tiger'];
+  const assetKey = availableModels.includes(animalKey) ? animalKey : 'cat';
+  const ANIMAL_ICONS = {};
+  const DIR_SHEET = `models/${assetKey}/${assetKey}-directions.webp`;
+  const REACT_SHEET = `models/${assetKey}/${assetKey}-reactions.webp`;
+  const POS = {
+    'up-left':    [0, 0],
+    'up':         [50, 0],
+    'up-right':   [100, 0],
+    'left':       [0, 50],
+    'center':     [50, 50],
+    'right':      [100, 50],
+    'down-left':  [0, 100],
+    'down':       [50, 100],
+    'down-right': [100, 100],
+  };
+
+  // NOTE: sprite sheet is a 3x3 grid (9 cells). To add a real "wink" cell you'd need
+  // a 10th frame or to repurpose an existing one — for now "wink" reuses the
+  // 'blush' frame position but has its own icon/label so it's easy to point at
+  // a dedicated frame later if you add one to the sheet.
+  const REACTIONS = [
+    { key: 'happy',      label: 'Happy',      pos: [0, 0] },
+    { key: 'love',       label: 'Love',       pos: [50, 0] },
+    { key: 'sparkle',    label: 'Excited',    pos: [100, 0] },
+    { key: 'surprised',  label: 'Surprised',  pos: [0, 50] },
+    { key: 'starstruck', label: 'Starstruck', pos: [50, 50] },
+    { key: 'blush',      label: 'Blush',      pos: [100, 50] },
+    { key: 'sleepy',     label: 'Sleepy',     pos: [0, 100] },
+    { key: 'dizzy',      label: 'Dizzy',      pos: [50, 100] },
+    { key: 'tongue',     label: 'Tongue',     pos: [100, 100] },
+    { key: 'wink',       label: 'Wink',       pos: [100, 50] },
+  ];
+  const REACTION_ICONS = {
+    happy: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 14s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/></svg>',
+    love: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.8 8.7c0 5.3-8.8 10-8.8 10s-8.8-4.7-8.8-10A4.7 4.7 0 0 1 12 6.2a4.7 4.7 0 0 1 8.8 2.5Z"/></svg>',
+    sparkle: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 1.4 5.6L19 10l-5.6 1.4L12 17l-1.4-5.6L5 10l5.6-1.4L12 3ZM19 16l.6 2.4L22 19l-2.4.6L19 22l-.6-2.4L16 19l2.4-.6L19 16Z"/></svg>',
+    surprised: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><circle cx="9" cy="10" r="1"/><circle cx="15" cy="10" r="1"/><circle cx="12" cy="15" r="2"/></svg>',
+    starstruck: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 3 2.8 5.7 6.2.9-4.5 4.4 1.1 6.2-5.6-2.9-5.6 2.9 1.1-6.2L3 9.6l6.2-.9L12 3Z"/></svg>',
+    blush: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 10h.01M16 10h.01M9 15c1.8 1 4.2 1 6 0"/><path d="M6.5 13.5h2M15.5 13.5h2"/></svg>',
+    sleepy: '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 17c1.8 1 3.7 1 5.5 0M14 8h5l-5 5h5M9 4h4l-4 4h4"/></svg>',
+    dizzy: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="m9 9 6 6M15 9l-6 6M7 5v2M5 7h2"/></svg>',
+    tongue: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="11" r="8"/><path d="M8 10h.01M16 10h.01M9 15c1.5 1 4.5 1 6 0"/><path d="M10 15v3a2 2 0 0 0 4 0v-3"/></svg>',
+    wink: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M7.5 10h3M9 15.5c1.8 1 4.2 1 6 0M14.5 10.2c.8-.5 1.7-.5 2.5 0"/></svg>',
+  };
+
+  const sprite = document.getElementById('sprite');
+  const reactionsWrap = document.getElementById('reactions');
+  const reactionToggle = document.getElementById('reactionToggle');
+  const animalsGridToggle = document.getElementById('animalsGridToggle');
+  const animalGridPanel = document.getElementById('animalGridPanel');
+  const animalGridInner = document.getElementById('animalGridInner');
+  const stage = document.getElementById('stage');
+  const animalDock = document.getElementById('animalDock');
+  const previousAnimal = document.getElementById('previousAnimal');
+  const nextAnimal = document.getElementById('nextAnimal');
+  const FRAME_BOTTOM_OFFSET = 165;
+  const catSound = new Audio(`models/${assetKey}/${assetKey}.mp3`);
+  const pageFavicon = document.getElementById('pageFavicon');
+
+  document.title = 'ANIMORA | ' + ANIMAL_NAMES[animalKey];
+  const backgroundChecker = new Image();
+  const backgroundKey = assetKey;
+  backgroundChecker.onload = () => {
+    document.body.style.setProperty('--page-background', `url("models/${backgroundKey}/bg.png")`);
+  };
+  backgroundChecker.onerror = () => {
+    document.body.style.setProperty('--page-background', 'url("models/cat/bg.png")');
+  };
+  backgroundChecker.src = `models/${backgroundKey}/bg.png`;
+  if (pageDirection === 'left' || pageDirection === 'right') {
+    stage.classList.add('switching', 'page-' + pageDirection);
+    document.body.classList.add('page-slide-' + pageDirection);
+  }
+  pageFavicon.href = `models/${assetKey}/logo.png`;
+  pageFavicon.onerror = () => {
+    pageFavicon.href = DIR_SHEET;
+  };
+
+  sprite.style.backgroundImage = `url("${DIR_SHEET}")`;
+  if (ANIMAL_ICONS[animalKey]) {
+    sprite.classList.add('emoji-animal');
+    sprite.textContent = ANIMAL_ICONS[animalKey];
+  }
+  setPos(POS.center);
+
+  let reactionTimer = null;
+  let currentActiveBtn = null;
+  let followingPaused = false;
+
+  function setPos(pair) {
+    sprite.style.backgroundPosition = pair[0] + '% calc(' + pair[1] + '% + ' + FRAME_BOTTOM_OFFSET + 'px)';
+  }
+
+  function angleToDirKey(dx, dy) {
+    const threshX = 50;
+    const threshY = 40;
+    let col = 'center', row = 'center';
+    if (dx < -threshX) col = 'left';
+    else if (dx > threshX) col = 'right';
+    if (dy < -threshY) row = 'up';
+    else if (dy > threshY) row = 'down';
+
+    if (row === 'center' && col === 'center') return 'center';
+    if (row === 'center') return col;
+    if (col === 'center') return row;
+    return row + '-' + col;
+  }
+
+  function updateFollow(clientX, clientY) {
+    if (followingPaused) return;
+    const rect = sprite.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const dx = clientX - cx;
+    const dy = clientY - cy;
+    const key = angleToDirKey(dx, dy);
+    setPos(POS[key]);
+  }
+
+  window.addEventListener('mousemove', (e) => {
+    resetIdleTimer();
+    updateFollow(e.clientX, e.clientY);
+  });
+
+  window.addEventListener('touchmove', (e) => {
+    resetIdleTimer();
+    if (e.touches && e.touches[0]) {
+      updateFollow(e.touches[0].clientX, e.touches[0].clientY);
+    }
+  }, { passive: true });
+
+  function playReaction(reaction, btn) {
+    followingPaused = true;
+    if (!ANIMAL_ICONS[animalKey]) {
+      sprite.style.backgroundImage = `url("${REACT_SHEET}")`;
+    }
+    setPos(reaction.pos);
+    sprite.classList.remove('pressed');
+    void sprite.offsetWidth;
+    sprite.classList.add('pressed');
+
+    if (currentActiveBtn) currentActiveBtn.classList.remove('active');
+    if (btn) { btn.classList.add('active'); currentActiveBtn = btn; }
+
+    clearTimeout(reactionTimer);
+    reactionTimer = setTimeout(() => {
+      if (!ANIMAL_ICONS[animalKey]) {
+        sprite.style.backgroundImage = `url("${DIR_SHEET}")`;
+      }
+      setPos(POS.center);
+      followingPaused = false;
+      if (currentActiveBtn) { currentActiveBtn.classList.remove('active'); currentActiveBtn = null; }
+    }, 1600);
+  }
+
+  REACTIONS.forEach((r) => {
+    const btn = document.createElement('button');
+    btn.className = 'rbtn';
+    btn.innerHTML = REACTION_ICONS[r.key];
+    btn.setAttribute('aria-label', r.label);
+    btn.title = r.label;
+    btn.addEventListener('click', () => {
+      resetIdleTimer();
+      playReaction(r, btn);
+    });
+    reactionsWrap.appendChild(btn);
+  });
+
+  reactionToggle.addEventListener('click', () => {
+    resetIdleTimer();
+    const isOpen = reactionsWrap.classList.toggle('open');
+    reactionToggle.setAttribute('aria-expanded', String(isOpen));
+    reactionToggle.setAttribute('aria-label', isOpen ? 'Hide reactions' : 'Show reactions');
+    reactionToggle.title = isOpen ? 'Hide reactions' : 'Show reactions';
+    if (isOpen) {
+      animalGridPanel.classList.remove('open');
+      animalsGridToggle.setAttribute('aria-expanded', 'false');
+      animalGridPanel.setAttribute('aria-hidden', 'true');
+    }
+  });
+
+  animalsGridToggle.addEventListener('click', () => {
+    resetIdleTimer();
+    const isOpen = animalGridPanel.classList.toggle('open');
+    animalsGridToggle.setAttribute('aria-expanded', String(isOpen));
+    animalsGridToggle.setAttribute('aria-label', isOpen ? 'Hide all animals' : 'Show all animals');
+    animalsGridToggle.title = isOpen ? 'Hide all animals' : 'Show all animals';
+    animalGridPanel.setAttribute('aria-hidden', String(!isOpen));
+    if (isOpen) {
+      reactionsWrap.classList.remove('open');
+      reactionToggle.setAttribute('aria-expanded', 'false');
+    }
+  });
+
+  document.addEventListener('click', (event) => {
+    if (!animalGridPanel.contains(event.target) && !animalsGridToggle.contains(event.target)) {
+      animalGridPanel.classList.remove('open');
+      animalsGridToggle.setAttribute('aria-expanded', 'false');
+      animalGridPanel.setAttribute('aria-hidden', 'true');
+    }
+  });
+
+  // --- Idle behavior: after a stretch of no interaction, the character
+  // nudges/wiggles and fires a small random reaction on its own, as if
+  // trying to get attention, then settles back down.
+  const IDLE_DELAY_MS = 15000; // 15s of no interaction
+  let idleTimer = null;
+
+  function scheduleIdle() {
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(triggerIdleBehavior, IDLE_DELAY_MS);
+  }
+
+  function resetIdleTimer() {
+    scheduleIdle();
+  }
+
+  function triggerIdleBehavior() {
+    if (followingPaused) {
+      // already mid-reaction; just try again shortly
+      scheduleIdle();
+      return;
+    }
+    sprite.classList.remove('idle-nudge');
+    void sprite.offsetWidth;
+    sprite.classList.add('idle-nudge');
+
+    const r = REACTIONS[Math.floor(Math.random() * REACTIONS.length)];
+    playReaction(r, null);
+
+    sprite.addEventListener('animationend', function handler() {
+      sprite.classList.remove('idle-nudge');
+      sprite.removeEventListener('animationend', handler);
+    });
+
+    scheduleIdle();
+  }
+
+  scheduleIdle();
+
+  function switchView(action, direction = 'right') {
+    stage.classList.remove('switching');
+    stage.classList.remove('page-left', 'page-right');
+    void stage.offsetWidth;
+    stage.classList.add('switching', 'page-' + direction);
+    action();
+  }
+
+  function navigateAfterSlide(target) {
+    window.location.href = target;
+  }
+
+  const animalPages = [
+    ['Cat', 'cat.html', '🐱'],
+    ['Bear', 'bear.html', '🐻'],
+    ['Bunny', 'bunny.html', '🐰'],
+    ['Deer', 'deer.html', '🦌'],
+    ['Dino', 'dino.html', '🦖'],
+    ['Fox', 'fox.html', '🦊'],
+    ['Frog', 'frog.html', '🐸'],
+    ['Hamster', 'hamster.html', '🐹'],
+    ['Hedgehog', 'hedgehog.html', '🦔'],
+    ['Koala', 'koala.html', '🐨'],
+    ['Mouse', 'mouse.html', '🐭'],
+    ['Otter', 'otter.html', '🦦'],
+    ['Owl', 'owl.html', '🦉'],
+    ['Panda', 'panda.html', '🐼'],
+    ['Penguin', 'penguin.html', '🐧'],
+    ['Pug', 'pug.html', '🐶'],
+    ['Raccoon', 'raccoon.html', '🦝'],
+    ['Red Panda', 'redpanda.html', '🦊'],
+    ['Sheep', 'sheep.html', '🐑'],
+    ['Sloth', 'sloth.html', '🦥'],
+    ['Tiger', 'tiger.html', '🐯'],
+  ];
+  const currentPage = animalKey + '.html';
+  const currentAnimalIndex = animalPages.findIndex(([, page]) =>
+    page === currentPage
+  );
+
+  function navigateAnimal(step) {
+    const nextIndex = (currentAnimalIndex + step + animalPages.length) % animalPages.length;
+    const [, page] = animalPages[nextIndex];
+    const direction = step < 0 ? 'left' : 'right';
+    const target = `cat.html?animal=${page.replace('.html', '')}&dir=${direction}`;
+    resetIdleTimer();
+    switchView(() => {
+      navigateAfterSlide(target);
+    }, direction);
+  }
+
+  previousAnimal.addEventListener('click', () => navigateAnimal(-1));
+  nextAnimal.addEventListener('click', () => navigateAnimal(1));
+
+  animalPages.forEach(([label, page, fallbackIcon]) => {
+    const item = document.createElement('button');
+    const isCurrentPage = currentPage === page;
+    item.className = 'dock-item' + (isCurrentPage ? ' active' : '');
+    item.type = 'button';
+    item.setAttribute('aria-label', label + ' page');
+    item.setAttribute('data-label', label);
+    item.title = label;
+    const slug = page.replace('.html', '');
+    const image = document.createElement('img');
+    image.alt = '';
+    const showFallback = () => {
+      image.remove();
+      const fallback = document.createElement('span');
+      fallback.className = 'animal-fallback';
+      fallback.textContent = fallbackIcon;
+      item.appendChild(fallback);
+    };
+    image.onerror = () => {
+      if (image.dataset.triedDirections) {
+        showFallback();
+        return;
+      }
+      image.dataset.triedDirections = 'true';
+      image.src = 'models/' + slug + '/' + slug + '-directions.webp';
+    };
+    image.src = 'models/' + slug + '/logo.png';
+    item.appendChild(image);
+    item.addEventListener('click', () => {
+      resetIdleTimer();
+      if (isCurrentPage) return;
+      const targetIndex = animalPages.findIndex(([, targetPage]) => targetPage === page);
+      const direction = targetIndex < currentAnimalIndex ? 'left' : 'right';
+      const target = `cat.html?animal=${page.replace('.html', '')}&dir=${direction}`;
+      switchView(() => {
+        navigateAfterSlide(target);
+      }, direction);
+    });
+    animalDock.appendChild(item);
+
+    const gridItem = document.createElement('button');
+    gridItem.type = 'button';
+    gridItem.className = 'animal-grid-item' + (isCurrentPage ? ' active' : '');
+    gridItem.title = label;
+    gridItem.setAttribute('aria-label', label + ' page');
+    const gridSprite = document.createElement('div');
+    const gridFallback = document.createElement('span');
+    gridSprite.className = 'animal-grid-sprite';
+    const setGridFallback = () => {
+      gridSprite.remove();
+      gridFallback.className = 'animal-grid-fallback';
+      gridFallback.textContent = fallbackIcon;
+      gridItem.appendChild(gridFallback);
+    };
+    const spriteSheetUrl = 'models/' + slug + '/' + slug + '-directions.webp';
+    const gridPreviewImage = new Image();
+    const setGridDirection = (x, y) => {
+      const gridRect = gridItem.getBoundingClientRect();
+      const centerX = gridRect.left + gridRect.width / 2;
+      const centerY = gridRect.top + gridRect.height / 2;
+      const dx = x - centerX;
+      const dy = y - centerY;
+      const absX = Math.abs(dx);
+      const absY = Math.abs(dy);
+      let pos = '50% 50%';
+      if (absX > absY) {
+        pos = dx > 0 ? '100% 50%' : '0% 50%';
+      } else if (absY > 0) {
+        pos = dy > 0 ? '50% 100%' : '50% 0%';
+      }
+      gridSprite.style.backgroundPosition = pos;
+      gridSprite.style.transform = 'translateY(' + (dy > 0 ? 2 : 0) + 'px)';
+    };
+    gridPreviewImage.onload = () => {
+      gridSprite.style.backgroundImage = 'url("' + spriteSheetUrl + '")';
+      gridSprite.style.backgroundPosition = '50% 50%';
+      gridItem.appendChild(gridSprite);
+      const syncPointer = (event) => setGridDirection(event.clientX, event.clientY);
+      gridItem.addEventListener('pointermove', syncPointer);
+      gridItem.addEventListener('pointerleave', () => {
+        gridSprite.style.backgroundPosition = '50% 50%';
+        gridSprite.style.transform = 'translateY(0px)';
+      });
+    };
+    gridPreviewImage.onerror = () => {
+      setGridFallback();
+    };
+    gridPreviewImage.src = spriteSheetUrl;
+    if (gridPreviewImage.complete && gridPreviewImage.naturalWidth > 0) {
+      gridSprite.style.backgroundImage = 'url("' + spriteSheetUrl + '")';
+      gridItem.appendChild(gridSprite);
+      const syncPointer = (event) => setGridDirection(event.clientX, event.clientY);
+      gridItem.addEventListener('pointermove', syncPointer);
+      gridItem.addEventListener('pointerleave', () => {
+        gridSprite.style.backgroundPosition = '50% 50%';
+        gridSprite.style.transform = 'translateY(0px)';
+      });
+    }
+    const labelNode = document.createElement('span');
+    labelNode.textContent = label;
+    gridItem.appendChild(labelNode);
+    gridItem.addEventListener('click', () => {
+      resetIdleTimer();
+      if (isCurrentPage) {
+        animalGridPanel.classList.remove('open');
+        animalsGridToggle.setAttribute('aria-expanded', 'false');
+        animalGridPanel.setAttribute('aria-hidden', 'true');
+        return;
+      }
+      const targetIndex = animalPages.findIndex(([, targetPage]) => targetPage === page);
+      const direction = targetIndex < currentAnimalIndex ? 'left' : 'right';
+      const target = `cat.html?animal=${page.replace('.html', '')}&dir=${direction}`;
+      switchView(() => {
+        navigateAfterSlide(target);
+      }, direction);
+    });
+    animalGridInner.appendChild(gridItem);
+  });
+
+  sprite.addEventListener('click', () => {
+    resetIdleTimer();
+    catSound.currentTime = 0;
+    catSound.play().catch(() => {});
+    const r = REACTIONS[Math.floor(Math.random() * REACTIONS.length)];
+    playReaction(r, null);
+  });
+})();
+</script>
+<script src="cursor.js"></script>
+</body>
+</html>
