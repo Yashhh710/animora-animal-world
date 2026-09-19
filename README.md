@@ -18,11 +18,9 @@ Each animal has its own environment, visual identity, animations, and interactiv
 - 🎬 Cinematic cartoon-style environments
 - 🐱 Individual pages for different animals
 - 🖱️ Custom animal-foot mouse interaction
-- 👣 Two animated animal feet follow the mouse
 - 🎨 Playful rounded cartoon typography
 - 🌄 Unique backgrounds for different animals
 - ✨ Smooth animations and transitions
-- 📱 Responsive design
 - 🌙 Immersive visual experience
 - ⚡ Lightweight frontend implementation
 
